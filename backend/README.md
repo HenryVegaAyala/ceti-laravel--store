@@ -113,7 +113,29 @@ Este comando crea los clientes OAuth necesarios en la base de datos:
 
 ---
 
-### 8. (Opcional) Ejecuta los seeders
+### 8. Genera las llaves de encriptación de Passport
+
+```bash
+docker exec php php /var/www/artisan passport:keys
+```
+
+> ⚠️ Este paso es **obligatorio**. Sin las llaves, Passport no puede firmar ni verificar los tokens de acceso.
+
+---
+
+### 9. Crea el cliente de acceso personal
+
+```bash
+docker exec php php /var/www/artisan passport:client --personal
+```
+
+Cuando te pida el nombre, puedes escribir cualquiera, por ejemplo: `Laravel Personal Access Client`
+
+> ⚠️ Este paso es **obligatorio**. Sin este cliente, el login retornará `Personal access client not found`.
+
+---
+
+### 10. (Opcional) Ejecuta los seeders
 
 ```bash
 docker exec php php /var/www/artisan db:seed
@@ -202,6 +224,21 @@ Puedes conectarte a MySQL desde cualquier cliente (TablePlus, DBeaver, MySQL Wor
 ## 🛠️ Comandos útiles
 
 ```bash
+# Instalar Passport (crear clientes OAuth en la BD)
+docker exec php php /var/www/artisan passport:install --force
+
+# Regenerar las llaves de encriptación de Passport
+docker exec php php /var/www/artisan passport:keys
+
+# Crear solo el cliente de acceso personal
+docker exec php php /var/www/artisan passport:client --personal
+
+# Crear solo el cliente Password Grant
+docker exec php php /var/www/artisan passport:client --password
+
+# Ver los clientes OAuth registrados
+docker exec php php /var/www/artisan passport:client --list
+
 # Ver logs de Laravel en tiempo real
 docker exec php tail -f /var/www/storage/logs/laravel.log
 
