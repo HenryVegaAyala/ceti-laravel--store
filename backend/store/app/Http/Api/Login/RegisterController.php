@@ -3,7 +3,7 @@
 namespace App\Http\Api\Login;
 
 use App\Modules\Base\Controllers\ApiController;
-use app\Modules\User\User;
+use App\Modules\User\User;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 
@@ -11,7 +11,8 @@ class RegisterController extends ApiController
 {
     public function __construct()
     {
-        parent::__construct();
+        // Se pasa '__invoke' como excepción para que este endpoint sea público.
+        parent::__construct(['__invoke']);
     }
 
     public function __invoke(Request $request): JsonResponse
