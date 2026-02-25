@@ -4,6 +4,7 @@ namespace App\Http\Api\Login;
 
 use App\Modules\Base\Controllers\ApiController;
 use Illuminate\Foundation\Auth\AuthenticatesUsers;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 
@@ -17,7 +18,7 @@ class LoginController extends ApiController
         parent::__construct(['__invoke']);
     }
 
-    public function __invoke(Request $request)
+    public function __invoke(Request $request): JsonResponse
     {
         $formData = $request->only(['email', 'password']);
 
