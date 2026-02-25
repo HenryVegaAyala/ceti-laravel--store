@@ -9,7 +9,7 @@ services:
       dockerfile: Dockerfile
     restart: always
     volumes:
-      - ./usuarios:/var/www
+      - ./store:/var/www
     depends_on:
       - mysql
     networks:
@@ -41,7 +41,7 @@ services:
       - "8500:80"
     restart: always
     volumes:
-      - ./usuarios:/var/www
+      - ./store:/var/www
       - ./docker/nginx/nginx.conf:/etc/nginx/conf.d/default.conf
     depends_on:
       - php
