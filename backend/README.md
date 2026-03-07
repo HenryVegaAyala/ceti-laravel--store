@@ -101,22 +101,11 @@ docker exec php php /var/www/artisan migrate
 
 ---
 
-### 7. Instala Laravel Passport
-
-```bash
-docker exec php php /var/www/artisan passport:install --force
-```
-
-Este comando crea los clientes OAuth necesarios en la base de datos:
-- **Personal Access Client** (para tokens de usuario)
-- **Password Grant Client**
-
----
 
 ### 8. Genera las llaves de encriptación de Passport
 
 ```bash
-docker exec php php /var/www/artisan passport:keys
+docker exec php php /var/www/artisan passport:keys --force
 ```
 
 > ⚠️ Este paso es **obligatorio**. Sin las llaves, Passport no puede firmar ni verificar los tokens de acceso.
