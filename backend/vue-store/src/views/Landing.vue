@@ -9,21 +9,11 @@
           <span class="nav-logo-text">VueStore</span>
         </div>
         <a-space class="nav-actions">
-          <a-input-search
-            v-model:value="searchQuery"
-            placeholder="Buscar productos..."
-            class="nav-search"
-            @search="onSearch"
-          />
           <a-badge :count="cartCount" show-zero>
             <a-button shape="circle" @click="openCart">
               <template #icon><ShoppingCartOutlined /></template>
             </a-button>
           </a-badge>
-          <a-button @click="$router.push('/form')">
-            <template #icon><AppstoreAddOutlined /></template>
-            Admin
-          </a-button>
           <a-button type="primary" @click="$router.push('/login')">
             <template #icon><UserOutlined /></template>
             Ingresar
@@ -34,70 +24,9 @@
 
     <a-layout-content>
 
-      <!-- HERO -->
-      <section class="hero">
-        <div class="hero-content">
-          <a-tag color="purple" class="hero-tag">🔥 Nuevos productos</a-tag>
-          <h1 class="hero-title">Descubre los mejores<br /><span>productos del momento</span></h1>
-          <p class="hero-subtitle">Envío gratis en compras mayores a $500. Hasta 50% de descuento en artículos seleccionados.</p>
-          <a-space>
-            <a-button type="primary" size="large" @click="scrollToProducts">
-              Ver productos
-            </a-button>
-            <a-button size="large" ghost>
-              Ver ofertas
-            </a-button>
-          </a-space>
-        </div>
-      </section>
-
-      <!-- STATS -->
-      <section class="stats-bar">
-        <a-row justify="center" :gutter="[48, 16]">
-          <a-col v-for="stat in stats" :key="stat.label" :xs="12" :sm="6">
-            <a-statistic :title="stat.label" :value="stat.value" :prefix="stat.prefix" />
-          </a-col>
-        </a-row>
-      </section>
-
-      <!-- CATEGORÍAS -->
-      <section class="section">
-        <div class="container">
-          <h2 class="section-title">Categorías</h2>
-          <a-row :gutter="[16, 16]" justify="center">
-            <a-col
-              v-for="cat in categories"
-              :key="cat.name"
-              :xs="12" :sm="8" :md="4"
-            >
-              <a-card
-                hoverable
-                class="cat-card"
-                :class="{ active: selectedCategory === cat.name }"
-                @click="filterByCategory(cat.name)"
-              >
-                <div class="cat-icon">{{ cat.emoji }}</div>
-                <div class="cat-name">{{ cat.name }}</div>
-              </a-card>
-            </a-col>
-          </a-row>
-        </div>
-      </section>
-
       <!-- PRODUCTOS -->
       <section class="section products-section" id="productos">
         <div class="container">
-          <div class="products-header">
-            <h2 class="section-title">
-              {{ selectedCategory === 'Todos' ? 'Todos los productos' : selectedCategory }}
-            </h2>
-            <a-select v-model:value="sortBy" class="sort-select" @change="sortProducts">
-              <a-select-option value="default">Relevancia</a-select-option>
-              <a-select-option value="price-asc">Precio: menor a mayor</a-select-option>
-              <a-select-option value="price-desc">Precio: mayor a menor</a-select-option>
-              <a-select-option value="rating">Mejor valorados</a-select-option>
-            </a-select>
-          </div>
 
           <a-spin :spinning="loading" size="large">
             <a-row :gutter="[24, 24]">
@@ -110,30 +39,24 @@
                   <template #cover>
                     <div class="product-img-wrap">
                       <img :src="product.image" :alt="product.name" class="product-img" />
-                      <a-tag v-if="product.discount" color="red" class="product-badge">
-                        -{{ product.discount }}%
-                      </a-tag>
                     </div>
                   </template>
-                  <a-tag :color="product.categoryColor" class="product-cat-tag">
-                    {{ product.category }}
-                  </a-tag>
                   <a-card-meta :title="product.name">
                     <template #description>
-                      <a-rate :value="product.rating" disabled allow-half class="product-rate" />
-                      <span class="product-reviews">({{ product.reviews }})</span>
+                      <span class="product-reviews">({{ product.description }})</span>
                     </template>
                   </a-card-meta>
                   <div class="product-footer">
                     <div class="product-price">
                       <span class="price-current">${{ product.price }}</span>
-                      <span v-if="product.originalPrice" class="price-original">
-                        ${{ product.originalPrice }}
-                      </span>
                     </div>
                     <a-button type="primary" size="small" @click="addToCart(product)">
                       <template #icon><ShoppingCartOutlined /></template>
                       Agregar
+                    </a-button>
+                    <a-button type="primary" danger size="small" @click="removeProduct(product)">
+                      <template #icon><DeleteOutlined /></template>
+                      Eliminar
                     </a-button>
                   </div>
                 </a-card>
@@ -150,18 +73,6 @@
         </div>
       </section>
 
-      <!-- BANNER OFERTA -->
-      <section class="promo-banner">
-        <div class="promo-content">
-          <ThunderboltOutlined class="promo-icon" />
-          <div>
-            <h3 class="promo-title">¡Oferta especial de temporada!</h3>
-            <p class="promo-sub">Usa el cupón <a-tag color="gold">VUETIGER</a-tag> y obtén 20% extra</p>
-          </div>
-          <a-button type="primary" ghost size="large">Comprar ahora</a-button>
-        </div>
-      </section>
-
     </a-layout-content>
 
     <!-- FOOTER -->
@@ -175,41 +86,32 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import {
   ShopOutlined,
   ShoppingCartOutlined,
   UserOutlined,
   ThunderboltOutlined,
-  AppstoreAddOutlined
+  AppstoreAddOutlined,
+  DeleteOutlined
 } from '@ant-design/icons-vue'
 import { message } from 'ant-design-vue'
 import { useProducts } from '../composables/useProducts.js'
+import api from '@/plugins/axios.js'
 
-const { products } = useProducts()
+const { loading, fetchProducts } = useProducts()
+const products = ref([])
 
 const searchQuery = ref('')
 const cartCount = ref(0)
-const loading = ref(false)
+
+onMounted(async () => {
+ const {data} = await api.get("/products")
+
+  products.value = data.data.response
+})
 const selectedCategory = ref('Todos')
 const sortBy = ref('default')
-
-const stats = [
-  { label: 'Productos', value: 1200, prefix: '📦' },
-  { label: 'Clientes felices', value: 8500, prefix: '😊' },
-  { label: 'Marcas', value: 120, prefix: '🏷️' },
-  { label: 'Entregas realizadas', value: 25000, prefix: '🚚' },
-]
-
-const categories = [
-  { name: 'Todos',       emoji: '🛒' },
-  { name: 'Electrónica', emoji: '💻' },
-  { name: 'Ropa',        emoji: '👕' },
-  { name: 'Hogar',       emoji: '🏠' },
-  { name: 'Deportes',    emoji: '⚽' },
-  { name: 'Libros',      emoji: '📚' },
-  { name: 'Otros',       emoji: '📦' },
-]
 
 const filteredProducts = computed(() => {
   let list = products.value
@@ -230,20 +132,25 @@ const filteredProducts = computed(() => {
   return list
 })
 
-const filterByCategory = (cat) => {
-  selectedCategory.value = cat
-}
-
-const sortProducts = () => { /* reactivo por computed */ }
-
-const onSearch = (val) => {
-  searchQuery.value = val
-}
-
 const addToCart = (product) => {
   cartCount.value++
   message.success(`"${product.name}" agregado al carrito 🛒`)
 }
+
+const removeProduct = async (product) => {
+    try {
+      const {data} = await api.delete(`/products/${product.id}`)
+      if (data && data?.success) {
+        products.value = products.value.filter(p => p.id !== product.id)
+        message.success(`"${product.name}" eliminado correctamente`)
+      } else {
+        message.error("No se pudo eliminar el producto, Inicia sesión para eliminar productos")
+      }
+    } catch (e) {
+      message.error("No se pudo eliminar el producto, Inicia sesión para eliminar productos")
+    }
+}
+
 
 const openCart = () => {
   message.info(`Tienes ${cartCount.value} producto(s) en el carrito`)
@@ -255,6 +162,7 @@ const scrollToProducts = () => {
 </script>
 
 <style scoped>
+
 /* ── LAYOUT ── */
 .layout { min-height: 100vh; background: #f5f5f5; }
 

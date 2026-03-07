@@ -25,6 +25,7 @@ class ProductController extends ApiController
                 "products.name",
                 "products.description",
                 "products.price",
+                "products.image_url",
                 "categories.id as category_id",
                 "categories.name as category_name"
             ])

@@ -1,4 +1,5 @@
 import { ref } from 'vue'
+import api from '../plugins/axios.js'
 
 // Estado global compartido entre vistas
 const customProducts = ref([
@@ -56,6 +57,26 @@ const categoryColorMap = {
 }
 
 export function useProducts() {
+  const loading = ref(false)
+  const error = ref(null)
+
+  const fetchProducts = async () => {
+    loading.value = true
+    error.value = null
+    try {
+      const { data } = await api.get('/products')
+      customProducts.value = data.map((p) => ({
+        ...p,
+        categoryColor: categoryColorMap[p.category] ?? 'default',
+      }))
+    } catch (err) {
+      error.value = err.message
+      // Si falla, se mantienen los productos locales de respaldo
+    } finally {
+      loading.value = false
+    }
+  }
+
   const addProduct = (product) => {
     customProducts.value.push({
       ...product,
@@ -81,6 +102,5 @@ export function useProducts() {
     }
   }
 
-  return { products: customProducts, addProduct, deleteProduct, updateProduct }
+  return { products: customProducts, loading, error, fetchProducts, addProduct, deleteProduct, updateProduct }
 }
-

@@ -3,59 +3,49 @@
     <a-card class="login-card" :bordered="false">
       <!-- Logo / Título -->
       <div class="login-header">
-        <ShopOutlined class="login-icon" />
+        <ShopOutlined class="login-icon"/>
         <h2 class="login-title">Iniciar Sesión</h2>
-        <p class="login-subtitle">Bienvenido de vuelta</p>
       </div>
 
       <!-- Formulario -->
       <a-form
-        :model="formState"
-        :rules="rules"
-        layout="vertical"
-        @finish="onFinish"
-        @finishFailed="onFinishFailed"
+          :model="formState"
+          :rules="rules"
+          layout="vertical"
+          @finish="onFinish"
+          @finishFailed="onFinishFailed"
       >
         <a-form-item label="Correo electrónico" name="email">
           <a-input
-            v-model:value="formState.email"
-            size="large"
-            placeholder="correo@ejemplo.com"
+              v-model:value="formState.email"
+              size="large"
+              placeholder="correo@ejemplo.com"
           >
             <template #prefix>
-              <MailOutlined class="input-icon" />
+              <MailOutlined class="input-icon"/>
             </template>
           </a-input>
         </a-form-item>
 
         <a-form-item label="Contraseña" name="password">
           <a-input-password
-            v-model:value="formState.password"
-            size="large"
-            placeholder="••••••••"
+              v-model:value="formState.password"
+              size="large"
+              placeholder="••••••••"
           >
             <template #prefix>
-              <LockOutlined class="input-icon" />
+              <LockOutlined class="input-icon"/>
             </template>
           </a-input-password>
         </a-form-item>
 
         <a-form-item>
-          <div class="form-options">
-            <a-checkbox v-model:checked="formState.remember">
-              Recuérdame
-            </a-checkbox>
-            <a href="#" class="forgot-link">¿Olvidaste tu contraseña?</a>
-          </div>
-        </a-form-item>
-
-        <a-form-item>
           <a-button
-            type="primary"
-            html-type="submit"
-            size="large"
-            block
-            :loading="loading"
+              type="primary"
+              html-type="submit"
+              size="large"
+              block
+              :loading="loading"
           >
             Ingresar
           </a-button>
@@ -72,10 +62,11 @@
 </template>
 
 <script setup>
-import { reactive, ref } from 'vue'
-import { MailOutlined, LockOutlined, ShopOutlined } from '@ant-design/icons-vue'
-import { message } from 'ant-design-vue'
-import { useRouter } from 'vue-router'
+import {reactive, ref} from 'vue'
+import {MailOutlined, LockOutlined, ShopOutlined} from '@ant-design/icons-vue'
+import {message} from 'ant-design-vue'
+import {useRouter} from 'vue-router'
+import api from "@/plugins/axios.js"
 
 const router = useRouter()
 const loading = ref(false)
@@ -88,12 +79,12 @@ const formState = reactive({
 
 const rules = {
   email: [
-    { required: true, message: 'Por favor ingresa tu correo', trigger: 'blur' },
-    { type: 'email', message: 'Ingresa un correo válido', trigger: 'blur' },
+    {required: true, message: 'Por favor ingresa tu correo', trigger: 'blur'},
+    {type: 'email', message: 'Ingresa un correo válido', trigger: 'blur'},
   ],
   password: [
-    { required: true, message: 'Por favor ingresa tu contraseña', trigger: 'blur' },
-    { min: 6, message: 'La contraseña debe tener al menos 6 caracteres', trigger: 'blur' },
+    {required: true, message: 'Por favor ingresa tu contraseña', trigger: 'blur'},
+    {min: 6, message: 'La contraseña debe tener al menos 6 caracteres', trigger: 'blur'},
   ],
 }
 
@@ -103,7 +94,15 @@ const onFinish = async (values) => {
     // Aquí conectas con tu API de Laravel
     console.log('Credenciales:', values)
     message.success('Inicio de sesión exitoso')
-    // router.push('/dashboard') // descomentar al conectar con backend
+
+    const {data} = await api.post('/login', {
+      email: values.email,
+      password: values.password,
+    })
+
+    localStorage.setItem("token", data.data.token)
+
+   await router.push('/')
   } catch (error) {
     message.error('Credenciales incorrectas. Intenta de nuevo.')
   } finally {
@@ -111,7 +110,7 @@ const onFinish = async (values) => {
   }
 }
 
-const onFinishFailed = ({ errorFields }) => {
+const onFinishFailed = ({errorFields}) => {
   console.log('Errores:', errorFields)
 }
 
