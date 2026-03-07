@@ -2,9 +2,11 @@
 
 namespace App\Modules\Category;
 
+use App\Modules\Product\Product;
 use Database\Factories\CategoryFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Category extends Model
@@ -27,5 +29,10 @@ class Category extends Model
     protected static function newFactory(): CategoryFactory
     {
         return CategoryFactory::new();
+    }
+
+    public function product(): BelongsTo
+    {
+        return $this->belongsTo(Product::class);
     }
 }

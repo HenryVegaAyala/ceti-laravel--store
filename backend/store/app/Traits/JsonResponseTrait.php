@@ -14,7 +14,7 @@ trait JsonResponseTrait
             'code' => $code
         ];
 
-        return response()->json($response);
+        return response()->json($response, $code);
     }
 
     public function errorResponse(mixed $message = [], int $code = 500): JsonResponse
@@ -26,6 +26,6 @@ trait JsonResponseTrait
             'data' => []
         ];
 
-        return response()->json($response, 500);
+        return response()->json($response, $code);
     }
 }
